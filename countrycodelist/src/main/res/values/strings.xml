@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CountryCodeList</string>
+    <string name="country_search_hint">search country</string>
+</resources>

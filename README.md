@@ -2,7 +2,7 @@
 
 版本号：1.0.0 
 添加依赖 compile 'com.wi11s:countrycodelist:1.0.0'
-\<iframe height=500 width=500 src="http://ww4.sinaimg.cn/mw690/e75a115bgw1f3rrbzv1m8g209v0diqv7.gif"\>
+
 支持中英文支持，根据本地语言；
 只支持对于条目的click 监听，ChildrenBean 包含一个 id，code，text。；
 并未加入自定义样式，后期根据需求再进行修改，

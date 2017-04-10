@@ -2,4 +2,5 @@
 <resources>
   <string name="app_name">CountryCodeList</string>
   <string name="country_search_hint">搜索国家</string>
+  <string name="no_find_country">未搜索到匹配结果</string>
 </resources>

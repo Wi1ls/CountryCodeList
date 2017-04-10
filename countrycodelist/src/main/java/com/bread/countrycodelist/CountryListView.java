@@ -5,6 +5,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.Layout;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -28,15 +29,9 @@ import java.util.Locale;
 
 import de.halfbit.pinnedsection.PinnedSectionListView;
 
-/**
- * Copyright (c) 2017, Bongmi
- * All rights reserved
- * Author: shenwei@bongmi.com
- */
-
 public class CountryListView extends LinearLayout {
-  public static final String EN_FILE="en_country.js";
-  public static final String CN_FILE="zh_country.js";
+  public static final String EN_FILE = "en_country.js";
+  public static final String CN_FILE = "zh_country.js";
   private Context context;
   //国家代码list 加右侧快捷定位 list
   private View mainContent;
@@ -52,7 +47,7 @@ public class CountryListView extends LinearLayout {
   //包含节点和子，节点是 String，子是CountryList.DataBean.ChildrenBean
   private List<Object> allDataContainsHeaderAndChild = new ArrayList<>();
   //不含首字母的国家集合
-  private List<CountryList.DataBean.ChildrenBean> countryChildList =new ArrayList<>();
+  private List<CountryList.DataBean.ChildrenBean> countryChildList = new ArrayList<>();
   //搜索结果的 ListView
   private List<CountryList.DataBean.ChildrenBean> searchChildResult = new ArrayList<>();
   //搜索栏
@@ -67,6 +62,7 @@ public class CountryListView extends LinearLayout {
   //取消按钮
   private View searchCancel;
   private ImageView deleteTextView;
+  private TextView emptyTextView;
   //防止重复搜索，上次搜索关键词
   private String lastSearch;
 
@@ -93,11 +89,11 @@ public class CountryListView extends LinearLayout {
   private void initCountryJson() {
     try {
       String fileName;
-      String language=Locale.getDefault().getLanguage();
-      if("zh".equals(language)){
-        fileName=CN_FILE;
-      }else{
-        fileName=EN_FILE;
+      String language = Locale.getDefault().getLanguage();
+      if ("zh".equals(language)) {
+        fileName = CN_FILE;
+      } else {
+        fileName = EN_FILE;
       }
       InputStreamReader isr = new InputStreamReader(context.getAssets().open(fileName), "UTF-8");
       BufferedReader br = new BufferedReader(isr);
@@ -111,9 +107,9 @@ public class CountryListView extends LinearLayout {
       Gson gson = new Gson();
       CountryList country = gson.fromJson(builder.toString(), CountryList.class);
       countriesLetter = new String[country.getData().size()];
-      letterToIndex=new int[countriesLetter.length];
+      letterToIndex = new int[countriesLetter.length];
       for (int index = 0; index < countriesLetter.length; index++) {
-        letterToIndex[index]=allDataContainsHeaderAndChild.size();
+        letterToIndex[index] = allDataContainsHeaderAndChild.size();
         countriesLetter[index] = country.getData().get(index).getText();
         allDataContainsHeaderAndChild.add(countriesLetter[index]);
         for (int i = 0; i < country.getData().get(index).getChildren().size(); i++) {
@@ -131,26 +127,27 @@ public class CountryListView extends LinearLayout {
   private void initCountrySearch() {
     countrySearch = LayoutInflater.from(context).inflate(R.layout.country_search, null, false);
     searchEditText = (EditText) countrySearch.findViewById(R.id.et_search);
-    searchCancel=countrySearch.findViewById(R.id.cancel_search);
-    deleteTextView= (ImageView) countrySearch.findViewById(R.id.iv_et_delete);
+    searchCancel = countrySearch.findViewById(R.id.cancel_search);
+    deleteTextView = (ImageView) countrySearch.findViewById(R.id.iv_et_delete);
     addView(countrySearch);
   }
 
   //初始化主界面
   private void initCountryMain() {
     View countryMain = LayoutInflater.from(context).inflate(R.layout.country_main, null, false);
-    mainContent=countryMain.findViewById(R.id.rl_main);
-    pinnedSectionListView= (PinnedSectionListView) countryMain.findViewById(R.id.pinnedSectionListView);
-    waveSideBar= (WaveSideBar) countryMain.findViewById(R.id.waveSideBar);
+    mainContent = countryMain.findViewById(R.id.rl_main);
+    pinnedSectionListView = (PinnedSectionListView) countryMain.findViewById(R.id.pinnedSectionListView);
+    waveSideBar = (WaveSideBar) countryMain.findViewById(R.id.waveSideBar);
     bg = countryMain.findViewById(R.id.bg);
+    emptyTextView= (TextView) countryMain.findViewById(R.id.emptyText);
     rvSearch = (RecyclerView) countryMain.findViewById(R.id.rv_search);
     rvSearch.setLayoutManager(new LinearLayoutManager(context));
-    searchAdapter = new RvSearchAdapter( context);
+    searchAdapter = new RvSearchAdapter(context);
     rvSearch.setAdapter(searchAdapter);
-    rvSearch.addItemDecoration(new DividerItemDecoration(context,VERTICAL));
+    rvSearch.addItemDecoration(new DividerItemDecoration(context, VERTICAL));
     addView(countryMain);
     waveSideBar.setIndexItems(countriesLetter);
-    pinnedAdapter=new PinnedAdapter();
+    pinnedAdapter = new PinnedAdapter();
     pinnedSectionListView.setAdapter(pinnedAdapter);
     waveSideBar.setOnSelectIndexItemListener(new WaveSideBar.OnSelectIndexItemListener() {
       @Override
@@ -161,8 +158,8 @@ public class CountryListView extends LinearLayout {
   }
 
   //根据右侧快捷索引String返回所谓位
-  private int getLetterIndex(String index){
-    for(int i=0;i<countriesLetter.length;i++){
+  private int getLetterIndex(String index) {
+    for (int i = 0; i < countriesLetter.length; i++) {
       if (index.equals(countriesLetter[i]))
         return i;
     }
@@ -190,7 +187,7 @@ public class CountryListView extends LinearLayout {
           bg.setVisibility(VISIBLE);
           searchCancel.setVisibility(VISIBLE);
           deleteTextView.setVisibility(VISIBLE);
-        }else{
+        } else {
           bg.setVisibility(INVISIBLE);
           rvSearch.setVisibility(INVISIBLE);
           mainContent.setVisibility(VISIBLE);
@@ -200,10 +197,12 @@ public class CountryListView extends LinearLayout {
     });
     searchEditText.addTextChangedListener(new TextWatcher() {
       @Override
-      public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+      }
 
       @Override
-      public void onTextChanged(CharSequence s, int start, int before, int count) {}
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+      }
 
       @Override
       public void afterTextChanged(Editable s) {
@@ -212,6 +211,7 @@ public class CountryListView extends LinearLayout {
         }
         if(lastSearch!=null&& TextUtils.isEmpty(s.toString().trim())){
           searchChildResult.clear();
+          emptyTextView.setVisibility(INVISIBLE);
           searchAdapter.refresh(searchChildResult);
           return;
         }
@@ -228,7 +228,13 @@ public class CountryListView extends LinearLayout {
           bg.setVisibility(INVISIBLE);
           mainContent.setVisibility(INVISIBLE);
         }
-        searchAdapter.refresh(searchChildResult);
+        if(searchChildResult.size()==0){
+          emptyTextView.setVisibility(VISIBLE);
+          emptyTextView.setText(String.format("未搜索到 \"%s\" 相关信息",searchEditText.getText().toString()));
+        }else{
+          searchAdapter.refresh(searchChildResult);
+          emptyTextView.setVisibility(INVISIBLE);
+        }
       }
     });
 
@@ -241,7 +247,7 @@ public class CountryListView extends LinearLayout {
   }
 
   //取消搜索的
-  private void cancelSearch(){
+  private void cancelSearch() {
     searchEditText.setText(null);
     rvSearch.setVisibility(INVISIBLE);
     bg.setVisibility(INVISIBLE);
@@ -250,32 +256,36 @@ public class CountryListView extends LinearLayout {
     mainContent.requestFocus();
     deleteTextView.setVisibility(GONE);
   }
+
   public interface OnCountryItemClickListener {
     void onClick(View item, CountryList.DataBean.ChildrenBean childrenBean);
   }
 
-  public class RvSearchAdapter extends RecyclerView.Adapter<RvSearchAdapter.MyViewHolder> {
+  public class RvSearchAdapter extends RecyclerView.Adapter<RvSearchAdapter.ItemViewHolder> {
     private CountryListView.OnCountryItemClickListener onCountryItemClickListener;
     private List<CountryList.DataBean.ChildrenBean> data;
     private Context context;
 
-    public RvSearchAdapter( Context context) {
+    public RvSearchAdapter(Context context) {
       this.data = new ArrayList<>();
       this.context = context;
     }
 
     @Override
-    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
       View view = LayoutInflater.from(context).inflate(R.layout.country_item, null, false);
-      return new MyViewHolder(view);
+      return new ItemViewHolder(view);
+
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
+    public void onBindViewHolder(ItemViewHolder holder, int position) {
+
       final CountryList.DataBean.ChildrenBean child = data.get(position);
-      holder.countryName.setText(child.getText());
-      holder.countryCode.setText(String.format("%s %s", "+", child.getCode()));
-      holder.itemView.setOnClickListener(new OnClickListener() {
+      ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
+      itemViewHolder.countryName.setText(child.getText());
+      itemViewHolder.countryCode.setText(String.format("%s %s", "+", child.getCode()));
+      itemViewHolder.itemView.setOnClickListener(new OnClickListener() {
         @Override
         public void onClick(View v) {
           if (onCountryItemClickListener != null) {
@@ -291,11 +301,11 @@ public class CountryListView extends LinearLayout {
       return this.data.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public class ItemViewHolder extends RecyclerView.ViewHolder {
       TextView countryName;
       TextView countryCode;
 
-      public MyViewHolder(View itemView) {
+      public ItemViewHolder(View itemView) {
         super(itemView);
         countryName = (TextView) itemView.findViewById(R.id.text_country_name);
         countryCode = (TextView) itemView.findViewById(R.id.text_country_code);
@@ -308,20 +318,20 @@ public class CountryListView extends LinearLayout {
       notifyDataSetChanged();
     }
 
-    public void clear(){
+    public void clear() {
       this.data.clear();
       notifyDataSetChanged();
     }
 
-    private void setOnCountryItemClickListener(OnCountryItemClickListener listener){
-     onCountryItemClickListener=listener;
+    private void setOnCountryItemClickListener(OnCountryItemClickListener listener) {
+      onCountryItemClickListener = listener;
     }
   }
 
-  class PinnedAdapter extends BaseAdapter implements PinnedSectionListView.PinnedSectionListAdapter{
-    private static final int TYPE_COUNT=2;
-    private static final int TYPE_HEAD=0;
-    private static final int TYPE_CHILD=1;
+  class PinnedAdapter extends BaseAdapter implements PinnedSectionListView.PinnedSectionListAdapter {
+    private static final int TYPE_COUNT = 2;
+    private static final int TYPE_HEAD = 0;
+    private static final int TYPE_CHILD = 1;
     private OnCountryItemClickListener onCountryItemClickListener;
 
     @Override
@@ -331,18 +341,18 @@ public class CountryListView extends LinearLayout {
 
     @Override
     public int getItemViewType(int position) {
-      return allDataContainsHeaderAndChild.get(position) instanceof CountryList.DataBean.ChildrenBean?
-          TYPE_CHILD:TYPE_HEAD;
+      return allDataContainsHeaderAndChild.get(position) instanceof CountryList.DataBean.ChildrenBean ?
+          TYPE_CHILD : TYPE_HEAD;
     }
 
     @Override
     public boolean isItemViewTypePinned(int viewType) {
-      return viewType==TYPE_HEAD;
+      return viewType == TYPE_HEAD;
     }
 
     @Override
     public int getCount() {
-      return allDataContainsHeaderAndChild.size() ;
+      return allDataContainsHeaderAndChild.size();
     }
 
     @Override
@@ -358,29 +368,29 @@ public class CountryListView extends LinearLayout {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
       Holder holder;
-      if(convertView==null){
-        if(getItemViewType(position)==TYPE_CHILD){
-          convertView=getChild();
-        }else{
-          convertView=getHeader();
+      if (convertView == null) {
+        if (getItemViewType(position) == TYPE_CHILD) {
+          convertView = getChild();
+        } else {
+          convertView = getHeader();
         }
       }
-      holder= (Holder) convertView.getTag();
-      if(getItemViewType(position)==TYPE_CHILD){
-        final CountryList.DataBean.ChildrenBean childrenBean= (CountryList.DataBean.ChildrenBean) allDataContainsHeaderAndChild.get(position);
+      holder = (Holder) convertView.getTag();
+      if (getItemViewType(position) == TYPE_CHILD) {
+        final CountryList.DataBean.ChildrenBean childrenBean = (CountryList.DataBean.ChildrenBean) allDataContainsHeaderAndChild.get(position);
         holder.countryName.setText(childrenBean.getText());
-        holder.countryCode.setText(String.format("%s %s","+",childrenBean.getCode()));
-        if(onCountryItemClickListener!=null){
+        holder.countryCode.setText(String.format("%s %s", "+", childrenBean.getCode()));
+        if (onCountryItemClickListener != null) {
           convertView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-              onCountryItemClickListener.onClick(v,childrenBean);
+              onCountryItemClickListener.onClick(v, childrenBean);
             }
           });
 
         }
-      }else{
-        String header= (String) allDataContainsHeaderAndChild.get(position);
+      } else {
+        String header = (String) allDataContainsHeaderAndChild.get(position);
         holder.header.setText(header);
         convertView.setOnClickListener(null);
       }
@@ -388,35 +398,35 @@ public class CountryListView extends LinearLayout {
       return convertView;
     }
 
-    class Holder{
+    class Holder {
       TextView header;
       TextView countryName;
       TextView countryCode;
     }
 
-    private TextView getHeader(){
-      TextView header= (TextView) LayoutInflater.from(context).inflate(R.layout.country_header,null,false);
-      Holder holder=new Holder();
-      holder.header=header;
+    private TextView getHeader() {
+      TextView header = (TextView) LayoutInflater.from(context).inflate(R.layout.country_header, null, false);
+      Holder holder = new Holder();
+      holder.header = header;
       header.setTag(holder);
       return header;
     }
 
-    private View getChild(){
-      View child=LayoutInflater.from(context).inflate(R.layout.country_item,null,false);
-      Holder holder=new Holder();
-      holder.countryCode= (TextView) child.findViewById(R.id.text_country_code);
-      holder.countryName= (TextView) child.findViewById(R.id.text_country_name);
+    private View getChild() {
+      View child = LayoutInflater.from(context).inflate(R.layout.country_item, null, false);
+      Holder holder = new Holder();
+      holder.countryCode = (TextView) child.findViewById(R.id.text_country_code);
+      holder.countryName = (TextView) child.findViewById(R.id.text_country_name);
       child.setTag(holder);
       return child;
     }
 
-    private void setOnCountryItemClickListener(OnCountryItemClickListener listener){
-      onCountryItemClickListener=listener;
+    private void setOnCountryItemClickListener(OnCountryItemClickListener listener) {
+      onCountryItemClickListener = listener;
     }
   }
 
-  public void setCountryItemClistener(OnCountryItemClickListener listener){
+  public void setCountryItemClistener(OnCountryItemClickListener listener) {
     pinnedAdapter.setOnCountryItemClickListener(listener);
     searchAdapter.setOnCountryItemClickListener(listener);
   }

@@ -5,7 +5,7 @@
         <item name="android:paddingLeft">16dp</item>
         <item name="android:paddingTop">1dp</item>
         <item name="android:paddingBottom">2.5dp</item>
-        <item name="android:background">@color/black_transparent_08</item>
+        <item name="android:background">@color/country_header_background</item>
         <item name="android:textColor">@color/black_transparent_87</item>
     </style>
 

@@ -9,4 +9,5 @@
 
     <color name="gray">#FFCCCCCC</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="country_header_background">#FFDFDFDF</color>
 </resources>

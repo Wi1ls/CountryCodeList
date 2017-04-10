@@ -9,7 +9,7 @@
 
 
     <LinearLayout
-        android:id="@+id/ll_eearch"
+        android:id="@+id/ll_search"
         android:layout_width="match_parent"
         android:layout_height="35dp"
         android:layout_marginBottom="12dp"
@@ -55,7 +55,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginRight="10dp"
-        android:background="@color/gray"
         android:gravity="center"
         android:paddingBottom="5dp"
         android:paddingLeft="10dp"
